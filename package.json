@@ -1,0 +1,17 @@
+{
+  "name": "ai-research-agent-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:web": "cd apps/web && npm run dev",
+    "dev:api": "uvicorn app.main:app --app-dir apps/api --reload --port 8000",
+    "build:web": "cd apps/web && npm run build",
+    "test:api": "pytest apps/api/tests",
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
