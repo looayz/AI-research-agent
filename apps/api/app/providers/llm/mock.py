@@ -6,10 +6,12 @@ be exercised end-to-end without any API key. Content is explicitly flagged
 as synthetic in the generated report.
 """
 
+import asyncio
 import json
 import re
 from typing import Optional
 
+from app.core.config import settings
 from app.core.text import detect_language, keywords
 from app.providers.llm.base import LLMProvider, LLMResponse
 
@@ -76,7 +78,7 @@ _T = {
         "report": {
             "title": "{Topic}: evidence review",
             "summary_h": "Executive summary",
-            "summary": "This report reviews {n} sources about “{question}”. {supported} of {total} key claims are supported by the evidence, {partial} are only partially supported and {weak} remain uncertain. {debate}These conclusions come from the offline demo mode and are illustrative only.",
+            "summary": "This report reviews {n} sources about “{question}”. Of {total} key claims, {supported} are supported by the evidence, {partial} partially supported and {weak} uncertain or disputed. {debate}These conclusions come from the offline demo mode and are illustrative only.",
             "debate": "The main debate concerns {contradiction}. ",
             "findings_h": "Key findings",
             "evidence_h": "Evidence and analysis",
@@ -150,7 +152,7 @@ _T = {
         "report": {
             "title": "{Topic} : revue des preuves",
             "summary_h": "Résumé exécutif",
-            "summary": "Ce rapport examine {n} sources sur « {question} ». {supported} affirmations clés sur {total} sont étayées par les preuves, {partial} ne le sont que partiellement et {weak} restent incertaines. {debate}Ces conclusions proviennent du mode démo hors ligne et sont purement illustratives.",
+            "summary": "Ce rapport examine {n} sources sur « {question} ». Sur {total} affirmations clés : {supported} étayées par les preuves, {partial} partiellement étayées et {weak} incertaines ou contestées. {debate}Ces conclusions proviennent du mode démo hors ligne et sont purement illustratives.",
             "debate": "Le principal débat porte sur : {contradiction}. ",
             "findings_h": "Principaux résultats",
             "evidence_h": "Preuves et analyse",
@@ -204,6 +206,8 @@ class MockLLMProvider(LLMProvider):
         max_tokens: int = 2000,
         json_mode: bool = False,
     ) -> LLMResponse:
+        if settings.MOCK_LATENCY_SECONDS > 0:
+            await asyncio.sleep(settings.MOCK_LATENCY_SECONDS)
         system = system_prompt or ""
         if "Research Planner" in system:
             content = json.dumps(self._plan(prompt), ensure_ascii=False)

@@ -23,6 +23,7 @@ os.environ.update(
         "DEBUG": "false",
         "LOG_LEVEL": "WARNING",
         "MEMORY_RECALL_ENABLED": "true",
+        "MOCK_LATENCY_SECONDS": "0",
     }
 )
 

@@ -1,79 +1,71 @@
-version: '3.8'
+# Production-ready stack: web (3000) -> api (8000) -> postgres + redis.
+# Only the web app needs to be public: it proxies /api to the API service.
+#
+#   cp .env.example .env   # optional: providers, API keys, passwords
+#   docker compose up --build -d
+#
+# Development with hot reload: see docker-compose.dev.yml.
+
+name: ai-research-agent
 
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: research_postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-ai_research_agent}
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d ai_research_agent"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
 
   redis:
     image: redis:7-alpine
-    container_name: research_redis
     restart: unless-stopped
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
+    # Cache only: no persistence, bounded memory.
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
 
   api:
-    build:
-      context: ./apps/api
-      dockerfile: Dockerfile
-    container_name: research_api
+    build: ./apps/api
     restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+    env_file:
+      - path: .env
+        required: false
     environment:
-      - APP_ENV=development
-      - MOCK_MODE=${MOCK_MODE:-true}
-      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-ai_research_agent}
-      - REDIS_URL=redis://redis:6379/0
-      - LLM_PROVIDER=${LLM_PROVIDER:-mock}
-      - SEARCH_PROVIDER=${SEARCH_PROVIDER:-mock}
+      APP_ENV: ${APP_ENV:-production}
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-ai_research_agent}
+      REDIS_URL: redis://redis:6379/0
     ports:
-      - "8000:8000"
-    volumes:
-      - ./apps/api:/app
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+      - "${API_PORT:-8000}:8000"
 
   web:
     build:
       context: ./apps/web
-      dockerfile: Dockerfile
-    container_name: research_web
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-}
     restart: unless-stopped
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      API_INTERNAL_URL: http://api:8000
     ports:
-      - "3000:3000"
-    volumes:
-      - ./apps/web:/app
-      - /app/node_modules
-      - /app/.next
+      - "${WEB_PORT:-3000}:3000"
 
 volumes:
   postgres_data:
-  redis_data:

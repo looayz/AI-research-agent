@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     # Forces the offline demo providers, whatever LLM_PROVIDER / SEARCH_PROVIDER
     # say. With the defaults below (both "mock") the app runs in demo mode anyway.
     MOCK_MODE: bool = False
+    # Simulated latency of the demo providers, so the live pipeline is visible.
+    MOCK_LATENCY_SECONDS: float = 0.8
 
     API_PREFIX: str = "/api"
     CORS_ORIGINS: list[str] = [

@@ -1,17 +1,20 @@
 {
-  "name": "ai-research-agent-monorepo",
-  "version": "1.0.0",
+  "name": "ai-research-agent",
+  "version": "0.3.0",
   "private": true,
+  "description": "Multi-agent research platform: plan, search, verify, synthesize with citations.",
   "scripts": {
-    "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\"",
-    "dev:web": "cd apps/web && npm run dev",
-    "dev:api": "uvicorn app.main:app --app-dir apps/api --reload --port 8000",
-    "build:web": "cd apps/web && npm run build",
-    "test:api": "pytest apps/api/tests",
-    "docker:up": "docker compose up --build",
+    "dev": "concurrently -k -n api,web -c blue,green \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "cd apps/api && uvicorn app.main:app --reload --reload-dir app --port 8000",
+    "dev:web": "npm --prefix apps/web run dev",
+    "build:web": "npm --prefix apps/web run build",
+    "lint": "npm --prefix apps/web run lint && cd apps/api && ruff check . && ruff format --check .",
+    "test": "cd apps/api && pytest -q",
+    "docker:up": "docker compose up --build -d",
+    "docker:dev": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build",
     "docker:down": "docker compose down"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^10.0.5"
   }
 }

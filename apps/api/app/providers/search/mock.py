@@ -5,9 +5,11 @@ stays coherent. They use reserved ``.example`` domains (RFC 2606) and carry
 their full text, so nothing is ever fetched over the network.
 """
 
+import asyncio
 import hashlib
 import re
 
+from app.core.config import settings
 from app.core.text import detect_language, keywords, strip_accents
 from app.providers.search.base import SearchProvider, SearchResult
 
@@ -101,6 +103,8 @@ class MockSearchProvider(SearchProvider):
     name = "mock"
 
     async def search(self, query: str, max_results: int = 5, domain: str = "general") -> list[SearchResult]:
+        if settings.MOCK_LATENCY_SECONDS > 0:
+            await asyncio.sleep(settings.MOCK_LATENCY_SECONDS / 2)
         lang = detect_language(query)
         words = [w for w in keywords(query, limit=12) if w.lower() not in _ANGLE_WORDS]
         topic = " ".join(words[:5]) or " ".join(keywords(query, limit=5)) or query.strip()

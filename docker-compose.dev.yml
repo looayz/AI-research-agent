@@ -1,0 +1,29 @@
+# Development override: hot reload for the API and the web app, database
+# reachable from the host.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+
+  api:
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--reload-dir", "app"]
+    environment:
+      APP_ENV: development
+    volumes:
+      - ./apps/api/app:/app/app
+
+  web:
+    build:
+      context: ./apps/web
+      target: deps
+    command: ["npm", "run", "dev", "--", "--hostname", "0.0.0.0"]
+    environment:
+      API_INTERNAL_URL: http://api:8000
+      WATCHPACK_POLLING: "true"
+    volumes:
+      - ./apps/web:/app
+      - /app/node_modules
+      - /app/.next

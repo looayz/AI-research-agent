@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 
 from app.api.health import router as health_router
 from app.api.memory import router as memory_router
@@ -32,11 +33,18 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
+    # Under the API prefix so the docs are also reachable through the web app's proxy.
     openapi_url=f"{settings.API_PREFIX}/openapi.json",
-    docs_url="/docs",
-    redoc_url="/redoc",
+    docs_url=f"{settings.API_PREFIX}/docs",
+    redoc_url=f"{settings.API_PREFIX}/redoc",
     lifespan=lifespan,
 )
+
+
+@app.get("/docs", include_in_schema=False)
+async def docs_redirect():
+    return RedirectResponse(url=f"{settings.API_PREFIX}/docs")
+
 
 app.add_middleware(
     CORSMiddleware,

@@ -2,32 +2,140 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Design tokens (RGB triplets so Tailwind can apply opacity). */
 :root {
-  --background: #f7f7f5;
-  --foreground: #121316;
+  --bg: 247 247 245;
+  --surface: 255 255 255;
+  --surface-2: 250 250 248;
+  --muted: 240 240 236;
+  --border: 228 228 223;
+  --border-strong: 208 208 202;
+  --fg: 18 19 22;
+  --fg-muted: 92 95 102;
+  --fg-subtle: 138 141 147;
+  --accent: 18 19 22;
+  --accent-fg: 255 255 255;
+
+  --sidebar: 14 15 17;
+  --sidebar-fg: 236 236 238;
+  --sidebar-muted: 150 153 160;
+  --sidebar-border: 32 33 38;
+  --sidebar-hover: 28 29 33;
+
+  --success: 4 138 96;
+  --warning: 196 110 6;
+  --danger: 212 36 72;
+  --info: 37 99 235;
+
+  color-scheme: light;
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", "Helvetica Neue", Arial, sans-serif;
-  min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+.dark {
+  --bg: 10 10 11;
+  --surface: 20 20 22;
+  --surface-2: 16 16 18;
+  --muted: 31 31 35;
+  --border: 40 40 45;
+  --border-strong: 60 60 66;
+  --fg: 236 236 238;
+  --fg-muted: 165 166 173;
+  --fg-subtle: 118 119 126;
+  --accent: 240 240 242;
+  --accent-fg: 12 12 13;
+
+  --sidebar: 14 14 16;
+  --sidebar-fg: 236 236 238;
+  --sidebar-muted: 140 141 148;
+  --sidebar-border: 34 34 38;
+  --sidebar-hover: 28 28 32;
+
+  --success: 52 211 153;
+  --warning: 251 191 36;
+  --danger: 251 113 133;
+  --info: 96 165 250;
+
+  color-scheme: dark;
 }
 
-/* Custom scrollbar for minimal sleek aesthetic */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-bg text-fg antialiased;
+    font-feature-settings: "ss01", "cv11";
+  }
+  ::selection {
+    background: rgb(var(--fg) / 0.14);
+  }
+  :focus-visible {
+    outline: 2px solid rgb(var(--fg) / 0.55);
+    outline-offset: 2px;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--border-strong)) transparent;
+  }
 }
-::-webkit-scrollbar-track {
-  background: transparent;
+
+@layer components {
+  /* Report typography, wired to the theme tokens. */
+  .prose-report {
+    --tw-prose-body: rgb(var(--fg) / 0.88);
+    --tw-prose-headings: rgb(var(--fg));
+    --tw-prose-lead: rgb(var(--fg-muted));
+    --tw-prose-links: rgb(var(--fg));
+    --tw-prose-bold: rgb(var(--fg));
+    --tw-prose-counters: rgb(var(--fg-subtle));
+    --tw-prose-bullets: rgb(var(--fg-subtle));
+    --tw-prose-hr: rgb(var(--border));
+    --tw-prose-quotes: rgb(var(--fg));
+    --tw-prose-quote-borders: rgb(var(--border-strong));
+    --tw-prose-captions: rgb(var(--fg-muted));
+    --tw-prose-code: rgb(var(--fg));
+    --tw-prose-pre-code: rgb(var(--fg));
+    --tw-prose-pre-bg: rgb(var(--surface-2));
+    --tw-prose-th-borders: rgb(var(--border-strong));
+    --tw-prose-td-borders: rgb(var(--border));
+  }
+  .prose-report h1 {
+    @apply text-2xl font-semibold tracking-tight;
+  }
+  .prose-report h2 {
+    @apply mt-10 border-b border-line pb-2 text-lg font-semibold tracking-tight;
+  }
+  .prose-report h3 {
+    @apply text-base font-semibold;
+  }
+  .prose-report a:not(.citation) {
+    @apply underline decoration-line-strong underline-offset-2 hover:decoration-fg;
+  }
+  .prose-report code::before,
+  .prose-report code::after {
+    content: none;
+  }
 }
-::-webkit-scrollbar-thumb {
-  background: #d4d4ce;
-  border-radius: 9999px;
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a2;
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white;
+  }
+  .print-full {
+    overflow: visible !important;
+    height: auto !important;
+  }
 }

@@ -1,19 +1,32 @@
 @echo off
-echo Starting AI Research Agent...
+rem One-command local start (Windows): API on :8000, web app on :3000.
+setlocal
+cd /d "%~dp0"
 
-if not exist ".venv" (
-    echo [1/3] Creating virtual environment...
-    python -m venv .venv
+where python >nul 2>nul || (echo Python 3.11+ is required: https://www.python.org/downloads/ & exit /b 1)
+python -c "import sys; sys.exit(sys.version_info < (3, 11))" || (echo Python 3.11+ is required. & exit /b 1)
+where npm >nul 2>nul || (echo Node.js 20.9+ is required: https://nodejs.org/ & exit /b 1)
+
+if not exist ".env" (
+    copy ".env.example" ".env" >nul
+    echo Created .env from .env.example ^(demo mode: no API key needed^).
 )
 
-echo [2/3] Checking dependencies...
-call .\.venv\Scripts\activate.bat
-pip install -q -r apps/api/requirements.txt
+echo [1/3] Python environment...
+if not exist ".venv" python -m venv .venv
+".venv\Scripts\python.exe" -m pip install -q --upgrade pip
+".venv\Scripts\python.exe" -m pip install -q -r apps\api\requirements.txt || exit /b 1
 
-echo [3/3] Launching Backend on port 8000 and Frontend on port 3000...
-start "AI Research Backend (FastAPI)" cmd /k ".\.venv\Scripts\python.exe -m uvicorn app.main:app --app-dir apps/api --port 8000 --reload"
-start "AI Research Frontend (Next.js)" cmd /k "cd apps/web && npm run dev"
+echo [2/3] Web dependencies...
+pushd apps\web
+call npm install --no-audit --no-fund --silent || (popd & exit /b 1)
+popd
 
-echo Services started!
-echo Frontend: http://localhost:3000
-echo Backend:  http://localhost:8000/docs
+echo [3/3] Starting services in two windows...
+start "AI Research Agent - API" cmd /k "cd /d "%~dp0apps\api" && "%~dp0.venv\Scripts\python.exe" -m uvicorn app.main:app --port 8000 --reload --reload-dir app"
+start "AI Research Agent - Web" cmd /k "cd /d "%~dp0apps\web" && npm run dev"
+
+echo.
+echo   Web app : http://localhost:3000
+echo   API docs: http://localhost:8000/api/docs
+endlocal
