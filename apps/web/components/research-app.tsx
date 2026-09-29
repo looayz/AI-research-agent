@@ -21,7 +21,10 @@ function Shell() {
   const [route, navigate] = useRoute();
   const { health, offline } = useHealth();
   const toast = useToast();
+  // `version` changes when data changes (create, delete, rerun...); `tick` only
+  // refreshes the sidebar while something runs, without resetting other views.
   const [version, bump] = useReducer((n: number) => n + 1, 0);
+  const [tick, bumpTick] = useReducer((n: number) => n + 1, 0);
   const [recent, setRecent] = useState<ResearchSummary[]>([]);
   const [total, setTotal] = useState(0);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -39,13 +42,13 @@ function Shell() {
     return () => {
       active = false;
     };
-  }, [version, offline]);
+  }, [version, tick, offline]);
 
   // Keep the sidebar statuses fresh while something runs in the background.
   const anyRunning = recent.some((item) => !isTerminal(item.status));
   useEffect(() => {
     if (!anyRunning) return;
-    const timer = window.setInterval(bump, 4000);
+    const timer = window.setInterval(bumpTick, 4000);
     return () => window.clearInterval(timer);
   }, [anyRunning]);
 

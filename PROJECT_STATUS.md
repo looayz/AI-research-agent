@@ -1,24 +1,29 @@
 # Project Status
 
-## Current Phase: PHASE 8 — PRODUCTION PACKAGING & HARDENING (COMPLETED)
+## Current version: 0.3.0 (review and hardening)
 
-### Completed
-- [x] **Phase 0 — Foundation**: Repository structure, Docker Compose, DB/Redis, Health checks, Docs.
-- [x] **Phase 1 — Basic Research**: Planner, Researcher, Content Extractor with SSRF protections, Synthesizer with citations.
-- [x] **Phase 2 — Verification & Contradictions**: Claim extraction, Contradiction engine, multi-source cross-checking.
-- [x] **Phase 3 — Real-Time Events & Streaming UI**: SSE live stream, pipeline stepper, human-in-the-loop source exclusion.
-- [x] **Phase 4 — Research History & Persistence**: Research history management, one-click rerun, delete, markdown export.
-- [x] **Phase 5 — Deep Research**: Recursive evidence gap analysis, automated follow-up queries, 3 depth modes (`Quick`, `Standard`, `Deep`).
-- [x] **Phase 6 — Domain Specialization**: Academic, Technical, Market, and General specialized researcher modes with Citation Registry.
-- [x] **Phase 7 — Semantic Research Memory**: Cross-investigation document vector recall, similarity search endpoint (`/api/memory/search`) and interactive UI explorer.
-- [x] **Phase 8 — Production Packaging**:
-  - Dockerfile multi-stage durci pour l'API FastAPI avec user local et healthcheck HTTP automatique ([apps/api/Dockerfile](file:///d:/Projects/AI%20reasearch%20agent/apps/api/Dockerfile)).
-  - Dockerfile multi-stage optimisé pour Next.js 14 avec séparation `deps`, `builder`, `runner` et utilisateur non-root `nextjs` ([apps/web/Dockerfile](file:///d:/Projects/AI%20reasearch%20agent/apps/web/Dockerfile)).
-  - Pipeline d'intégration continue GitHub Actions ([.github/workflows/ci.yml](file:///d:/Projects/AI%20reasearch%20agent/.github/workflows/ci.yml)) validant automatiquement les tests Pytest backend et le build frontend à chaque push.
-  - Guide complet de déploiement Coolify et VPS ([docs/COOLIFY_DEPLOYMENT.md](file:///d:/Projects/AI%20reasearch%20agent/docs/COOLIFY_DEPLOYMENT.md)).
-  - Documentation finale [README.md](file:///d:/Projects/AI%20reasearch%20agent/README.md) complétée avec l'intégralité des 8 phases au vert.
+The first version (phases 0 to 8) was reported as complete, but only the demo path on SQLite actually worked. Version 0.3 fixes that; see [docs/REVIEW.md](docs/REVIEW.md) for the full review.
 
----
+### Done
 
-## Master Build Roadmap: 100% Complete
-Toutes les phases du Master Build Prompt ont été implémentées, testées et validées.
+- [x] **Foundation**: FastAPI + Next.js monorepo, SQLite by default, PostgreSQL + Redis with Docker Compose.
+- [x] **Research pipeline**: planner, researcher (concurrent search and fetch, scoring), verifier, gap analyzer, synthesizer.
+- [x] **Depth modes** with an actual loop: quick (0 rounds), standard (1), deep (up to 3, re-verified each round).
+- [x] **Real providers**: OpenAI-compatible, Gemini, Anthropic; Tavily, SearXNG, DuckDuckGo, Wikipedia, arXiv.
+- [x] **Safety**: SSRF-safe fetching, no fabricated fallbacks, bounded inputs, non-root containers.
+- [x] **Live UI**: SSE with resume, pipeline view, activity timeline, progressive results.
+- [x] **Human in the loop**: exclude/include sources, regenerate the report, cancel, rerun.
+- [x] **History and memory**: search, filters, pagination; memory recall with URL de-duplication.
+- [x] **Exports**: Markdown, JSON, print/PDF.
+- [x] **Packaging**: working Docker images, compose (prod + dev), CI (SQLite + PostgreSQL, web, Docker smoke test).
+- [x] **Tests**: 103 hermetic backend tests.
+
+### Next
+
+- [ ] Authentication and rate limiting (until then: deploy behind an authenticating proxy).
+- [ ] Embedding provider + pgvector for the memory.
+- [ ] External task queue for multi-worker deployments.
+- [ ] Alembic migrations.
+- [ ] PDF extraction, JavaScript-rendered pages.
+- [ ] Evaluation set to compare models, prompts and depths.
+- [ ] Token-by-token report streaming.

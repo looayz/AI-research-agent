@@ -51,7 +51,7 @@ services:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-ai_research_agent}
       REDIS_URL: redis://redis:6379/0
     ports:
-      - "${API_PORT:-8000}:8000"
+      - "${API_PORT:-127.0.0.1:8000}:8000"
 
   web:
     build:

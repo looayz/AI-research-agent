@@ -1,46 +1,46 @@
-# Coolify & Production Deployment Guide
+# Deployment guide (Coolify or any Docker host)
 
-## 1. Coolify Deployment
+The stack is defined in `docker-compose.yml`: `web` (Next.js, port 3000) → `api` (FastAPI, port 8000) → `postgres` + `redis`.
+Only **web** needs to be public: it proxies `/api/*` (SSE included) to the API over the internal network.
 
-AI Research Agent is designed for single-click deployment using Docker Compose on Coolify or any VPS.
+## 1. Coolify
 
-### Configuration Steps on Coolify:
-1. In Coolify, create a new **Service** and select **Docker Compose**.
-2. Connect your Git repository (`main` branch).
-3. Set the following environment variables:
-   - `APP_ENV=production`
-   - `MOCK_MODE=false` (or `true` if you wish to run deterministic demo tests without external keys)
-   - `POSTGRES_USER=postgres`
-   - `POSTGRES_PASSWORD=<strong_random_password>`
-   - `POSTGRES_DB=ai_research_agent`
-   - `OPENAI_API_KEY=<your_key_here>` (or `GEMINI_API_KEY`)
-   - `SEARCH_PROVIDER=duckduckgo` (or `tavily`)
-   - `TAVILY_API_KEY=<your_tavily_key>`
-4. Deploy the stack. Coolify automatically attaches Traefik reverse proxy routing:
-   - Web frontend exposed on port `3000`.
-   - API backend exposed on port `8000`.
+1. Create a new resource → **Docker Compose** → connect this repository (branch `main`), compose file `docker-compose.yml`.
+2. Assign your domain to the **web** service, port `3000`. Do not give the api, postgres or redis services a domain.
+3. Set the environment variables (Coolify injects them into the compose file):
 
----
+   | Variable | Example |
+   |---|---|
+   | `POSTGRES_PASSWORD` | a long random string (required: change the default) |
+   | `LLM_PROVIDER` / `LLM_MODEL` | `openai` / `gpt-4o-mini`, `anthropic` / `claude-opus-5-5`, `gemini`… |
+   | `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`… | the key of the chosen provider |
+   | `SEARCH_PROVIDER` | `tavily`, `searxng`, `wikipedia,duckduckgo`… |
+   | `TAVILY_API_KEY` / `SEARXNG_BASE_URL` | if needed |
+   | `MAX_RUNTIME_SECONDS`, `MAX_SOURCES` | optional limits |
 
-## 2. Docker Compose Commands
+   The api service reads the same variables as `.env.example`.
+4. **Protect the app**: there is no built-in authentication and every research consumes API credits. Enable basic auth on the web domain (Coolify → service → *Basic Auth*, or a Traefik `basicauth` middleware), or put it behind Cloudflare Access or a VPN.
+5. Deploy. The health checks wait for PostgreSQL and Redis, then the API, then the web app.
 
-### Production start:
+## 2. Plain Docker host
+
 ```bash
-docker compose -f docker-compose.prod.yml up --build -d
+cp .env.example .env    # set POSTGRES_PASSWORD, providers and keys
+docker compose up --build -d
+docker compose ps       # every service should be "healthy"
+curl http://localhost:3000/api/health
 ```
 
-### Check service health:
-```bash
-docker compose ps
-curl http://localhost:8000/health
-```
+By default the API port is bound to `127.0.0.1:8000` on the host (`API_PORT`), so only the web app (`WEB_PORT`, default 3000) is reachable from outside. Put a TLS reverse proxy with authentication in front of it.
 
----
+Updates: `git pull && docker compose up --build -d`. The database schema is upgraded automatically at startup (additive changes only).
 
-## 3. Production Hardening Checklist
+## 3. Hardening checklist
 
-- [x] Multi-stage slim Docker builds (non-root runner user on web & minimal Python runner).
-- [x] SSRF guards actively blocking internal subnets and private loopbacks in `ContentExtractor`.
-- [x] Connection pooling and pre-ping on SQLAlchemy engine.
-- [x] Continuous healthchecks configured on Postgres, Redis, and FastAPI containers.
-- [x] Automated GitHub Actions CI workflow running unit tests on every pull request.
+- [x] Non-root containers (uid 1001), health checks on every service.
+- [x] PostgreSQL and Redis are not published on the host; Redis runs as a bounded, non-persistent cache.
+- [x] SSRF protection for fetched pages (public addresses only, checked at connect time and on each redirect).
+- [x] Security headers on the web app (`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`).
+- [ ] Authentication in front of the web app (your reverse proxy).
+- [ ] Strong `POSTGRES_PASSWORD`.
+- [ ] Backups of the `postgres_data` volume.
