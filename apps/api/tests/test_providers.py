@@ -104,7 +104,7 @@ def _anthropic(handler, model: str) -> AnthropicProvider:
     return AnthropicProvider(api_key="a-key", model=model, effort="medium", client=client)
 
 
-def _message(text: str, stop_reason: str = "end_turn", model: str = "claude-opus-5-5") -> dict:
+def _message(text: str, stop_reason: str = "end_turn", model: str = "claude-sonnet-5-5") -> dict:
     return {
         "id": "msg_1",
         "type": "message",
@@ -127,7 +127,7 @@ async def test_anthropic_current_model_request_shape():
         seen["beta"] = request.headers.get("anthropic-beta", "")
         return httpx2.Response(200, json=_message('{"ok": true}'))
 
-    response = await _anthropic(handler, "claude-opus-5-5").generate("hi", system_prompt="sys", temperature=0.1, max_tokens=500)
+    response = await _anthropic(handler, "claude-sonnet-5-5").generate("hi", system_prompt="sys", temperature=0.1, max_tokens=500)
     assert response.content == '{"ok": true}' and response.tokens_used == 15
     body = seen["body"]
     assert "temperature" not in body  # rejected by current models
@@ -151,6 +151,14 @@ async def test_anthropic_older_model_request_and_refusal():
     # No sampling parameter, no effort (unsupported on Haiku 4.5), no fallback.
     assert "temperature" not in bodies[0]
     assert "fallbacks" not in bodies[0] and "output_config" not in bodies[0]
+
+
+def test_anthropic_defaults_to_sonnet_5_5(monkeypatch):
+    monkeypatch.setattr(settings, "LLM_PROVIDER", "anthropic")
+    monkeypatch.setattr(settings, "LLM_MODEL", "")
+    monkeypatch.setattr(settings, "ANTHROPIC_API_KEY", "a-key")
+    provider = get_llm_provider()
+    assert isinstance(provider, AnthropicProvider) and provider.model == "claude-sonnet-5-5"
 
 
 def test_llm_factory(monkeypatch):

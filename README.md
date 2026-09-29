@@ -65,7 +65,7 @@ The app starts in **demo mode**. Edit `.env` (see `.env.example` for every optio
 | Setting | Values |
 |---|---|
 | `LLM_PROVIDER` | `openai`, `anthropic`, `gemini`, `groq`, `openrouter`, `ollama`, `mock` |
-| `LLM_MODEL` | empty = provider default (`gpt-4o-mini`, `claude-opus-5-5`, `gemini-2.5-flash`, `llama-3.3-70b-versatile`, `llama3.1`) |
+| `LLM_MODEL` | empty = provider default (`gpt-4o-mini`, `claude-sonnet-5-5`, `gemini-2.5-flash`, `llama-3.3-70b-versatile`, `llama3.1`) |
 | API keys | `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, `GROQ_API_KEY`, `OPENROUTER_API_KEY` |
 | `LLM_BASE_URL` | any OpenAI-compatible endpoint (LM Studio, vLLM…) |
 | `SEARCH_PROVIDER` | `tavily`, `searxng`, `duckduckgo`, `wikipedia`, `arxiv`, `mock` — comma-separated to combine, e.g. `tavily,arxiv` |

@@ -93,7 +93,7 @@ Le motif Python `lib/` ignorait **tous** les dossiers `lib`, y compris `apps/web
 - Récupération web sûre : vérification DNS de chaque adresse, contrôle **au moment de la connexion** (anti DNS-rebinding), redirections re-vérifiées une à une, taille et types de contenu plafonnés, prise en charge des proxys d'entreprise.
 - Plus aucun contenu inventé : une page inaccessible passe par l'extrait du moteur de recherche (signalé « snippet only »), sinon la source est ignorée. Une réponse LLM inutilisable déclenche une relance de réparation, puis un avertissement visible, sans jamais fabriquer d'affirmation.
 - Fournisseurs réels :
-  - LLM : OpenAI-compatible (OpenAI, Groq, OpenRouter, Ollama, LM Studio…, avec adaptation automatique aux paramètres refusés), Gemini, et Anthropic via le SDK officiel (`claude-opus-5-5` par défaut, effort réglable, repli côté serveur si le modèle décline une requête) ;
+  - LLM : OpenAI-compatible (OpenAI, Groq, OpenRouter, Ollama, LM Studio…, avec adaptation automatique aux paramètres refusés), Gemini, et Anthropic via le SDK officiel (`claude-sonnet-5-5` par défaut, effort réglable, repli côté serveur si le modèle décline une requête) ;
   - recherche : Tavily, SearXNG, DuckDuckGo, Wikipédia, arXiv, combinables ;
   - cache Redis optionnel, avec repli en mémoire.
 - Pipeline :

@@ -12,7 +12,7 @@ DEFAULT_MODELS = {
     "openrouter": "openai/gpt-4o-mini",
     "ollama": "llama3.1",
     "gemini": "gemini-2.5-flash",
-    "anthropic": "claude-opus-5-5",
+    "anthropic": "claude-sonnet-5-5",
 }
 
 # name -> (base URL, settings attribute holding the key, key required)

@@ -12,7 +12,7 @@ Only **web** needs to be public: it proxies `/api/*` (SSE included) to the API o
    | Variable | Example |
    |---|---|
    | `POSTGRES_PASSWORD` | a long random string (required: change the default) |
-   | `LLM_PROVIDER` / `LLM_MODEL` | `openai` / `gpt-4o-mini`, `anthropic` / `claude-opus-5-5`, `gemini`… |
+   | `LLM_PROVIDER` / `LLM_MODEL` | `openai` / `gpt-4o-mini`, `anthropic` / `claude-sonnet-5-5`, `gemini`… |
    | `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`… | the key of the chosen provider |
    | `SEARCH_PROVIDER` | `tavily`, `searxng`, `wikipedia,duckduckgo`… |
    | `TAVILY_API_KEY` / `SEARXNG_BASE_URL` | if needed |
